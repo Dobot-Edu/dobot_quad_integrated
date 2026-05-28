@@ -1,0 +1,15 @@
+# Unified robot command service.
+# All motion, safety stop, and balance compensation requests pass through
+# motion_gateway_node so there is only one RobotClient owner.
+
+string action_name
+string params_json
+string source
+uint8 priority
+bool require_safety_check
+---
+bool accepted
+bool success
+string message
+string robot_state
+string system_state

@@ -1,0 +1,6 @@
+string mode
+bool enabled
+---
+bool success
+string message
+string active_mode

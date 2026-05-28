@@ -1,0 +1,246 @@
+# Dobot 综合Demo 配置
+
+integrated:
+  enable_voice: true
+  enable_safety: true
+  enable_balance: true
+  auto_emergency_stop: false
+  command_state_hold_seconds: 1.0
+
+robot:
+  grpc_addr: "192.168.5.2:50051"
+  enable_execute: true
+  enable_builtin_obstacle_avoidance: true
+  enter_balance_stand_on_start: false
+  dds_config: "dobot_quad_sdk-main/low_level/python/config/dds_config.yaml"
+  dds_domain_id: 0
+
+motion_gateway:
+  reject_locomotion_on_sensor_stale: true
+
+feedback_audio:
+  enabled: true
+  backend: "direct"
+  use_dds_config: true
+  voice_cmd_topic: "rt/voice/cmd_tmp"
+  voice_action_topic: "rt/action/state"
+  voice_cmd_protocol: "task"
+  play_async: false
+  base_dir: "wavs"
+  files:
+    forward: "01.wav"
+    backward: "02.wav"
+    left: "03.wav"
+    right: "04.wav"
+    rotate_left: "05.wav"
+    rotate_right: "06.wav"
+    greeting: "07.wav"
+    introduce: "08.wav"
+  action_map:
+    walk_forward: "forward"
+    walk_backward: "backward"
+    move_left: "left"
+    move_right: "right"
+    rotate_left: "rotate_left"
+    rotate_right: "rotate_right"
+    wave: "greeting"
+    introduce: "introduce"
+
+asr:
+  # 本地离线、限定命令词表识别。
+  # 若未安装 vosk 或模型，会按 vosk.fallback_to_baidu 配置决定是否回退百度。
+  provider: "vosk"
+  vosk:
+    model_path: "models/vosk-model-small-cn-0.22"
+    sample_rate: 16000
+    use_grammar: false
+    fallback_to_baidu: false
+  baidu:
+    app_id: "122677008"
+    api_key: "GpPZx8oENBEW982HkJ2xvxur"
+    secret_key: "jOJHg6ynXqFRsHvxXK5VmQRh81mPk8Af"
+    dev_pid: 1537
+    connect_timeout: 3.0
+    read_timeout: 3.0
+    # 综合演示默认优先响应速度；网络不好时不要长时间重试卡住下一句指令。
+    retry_count: 1
+    fallback_dev_pids: []
+
+audio:
+  sample_rate: 24000
+  channels: 1
+  sample_width: 2
+  vad:
+    energy_threshold: 450
+    silence_duration: 0.8
+    max_record_duration: 2.2
+    min_speech_duration: 0.5
+    adaptive_noise: true
+    start_threshold_ratio: 3.0
+    stop_threshold_ratio: 1.8
+    noise_alpha: 0.03
+    pre_speech_padding_seconds: 0.25
+
+commands:
+  - keyword: "向前走"
+    synonyms: ["前进", "往前走", "向前", "往前"]
+    action: "walk_forward"
+    params:
+      distance: 0.5
+    feedback: "好的，正在前进"
+
+  - keyword: "向后退"
+    synonyms: ["后退", "往后退", "向后", "往后"]
+    action: "walk_backward"
+    params:
+      distance: 0.3
+    feedback: "好的，正在后退"
+
+  - keyword: "向左移动"
+    synonyms: ["左移", "往左走", "往左移", "向左走"]
+    action: "move_left"
+    params:
+      distance: 0.2
+    feedback: "好的，正在向左移动"
+
+  - keyword: "向右移动"
+    synonyms: ["右移", "往右走", "往右移", "向右走"]
+    action: "move_right"
+    params:
+      distance: 0.2
+    feedback: "好的，正在向右移动"
+
+  - keyword: "向左转"
+    synonyms: ["左转", "往左转"]
+    action: "rotate_left"
+    params:
+      angle: 45.0
+    feedback: "好的，正在向左转"
+
+  - keyword: "向右转"
+    synonyms: ["右转", "往右转"]
+    action: "rotate_right"
+    params:
+      angle: 45.0
+    feedback: "好的，正在向右转"
+
+  - keyword: "你好小影"
+    synonyms: ["你好", "小影你好", "嗨小影"]
+    action: "wave"
+    params: {}
+    feedback: "你好小影"
+
+  - keyword: "介绍一下自己"
+    synonyms: ["自我介绍", "你是谁", "介绍自己"]
+    action: "introduce"
+    params: {}
+    feedback: "介绍一下自己"
+
+unknown_feedback: "没有匹配到有效动作指令"
+
+service:
+  action_service: "/integrated/robot_command"
+  action_timeout: 30.0
+  wait_timeout: 10.0
+  source: "voice"
+  priority: 20
+
+dds:
+  config_file: "dobot_quad_sdk-main/low_level/python/config/dds_config.yaml"
+  domain_id: 0
+  front_depth_topic: "rt/camera/camera2/image_depth"
+  back_depth_topic: "rt/camera/camera3/image_depth"
+  lower_state_topic: "rt/lower/state"
+  publish_period_seconds: 0.02
+  # 深度流在虚拟机/桥接网卡中偶发停止更新时，发布 stale 状态并尝试重建 DDS 订阅。
+  stale_frame_timeout_seconds: 1.5
+  restart_on_stale: true
+  restart_timeout_seconds: 8.0
+  restart_cooldown_seconds: 10.0
+
+safety:
+  front_danger_distance_m: 0.50
+  front_recover_distance_m: 0.70
+  back_danger_distance_m: 0.50
+  back_recover_distance_m: 0.70
+  recover_stable_seconds: 2.0
+  stale_timeout_seconds: 3.0
+  safety_tick_period_seconds: 0.1
+  roi:
+    x_min: 0.15
+    x_max: 0.85
+    y_min: 0.15
+    y_max: 0.85
+  min_valid_depth_m: 0.10
+  max_valid_depth_m: 3.00
+  distance_method: "percentile"
+  distance_percentile: 5.0
+  distance_publish_period_seconds: 0.08
+  distance_sample_step: 3
+
+visualization:
+  publish_depth_image: true
+  publish_point_cloud: true
+  publish_markers: true
+  pointcloud_in_base_frame: true
+  marker_frame_id: "safety_guard_base"
+  front_frame_id: "front_depth_camera"
+  back_frame_id: "back_depth_camera"
+  camera_intrinsics:
+    width: 640
+    height: 480
+    fx: 589.839
+    fy: 589.651
+    cx: 320.495
+    cy: 245.069
+  pointcloud:
+    use_roi_only: true
+    sample_step: 8
+    max_points: 4000
+    publish_period_seconds: 0.5
+  depth_image:
+    publish_period_seconds: 0.2
+  markers:
+    publish_period_seconds: 0.3
+
+filter:
+  low_pass_alpha: 0.25
+  moving_average_window: 5
+
+control:
+  enable_balance_execute: true
+  target_roll_deg: 0.0
+  target_pitch_deg: 0.0
+  trigger_threshold_deg: 3.0
+  settle_threshold_deg: 1.5
+  max_compensation_deg: 10.0
+  action_duration_seconds: 0.8
+  action_cooldown_seconds: 1.2
+  roll_output_sign: -1.0
+  pitch_output_sign: -1.0
+  kp_roll: 0.8
+  ki_roll: 0.0
+  kd_roll: 0.08
+  kp_pitch: 0.8
+  ki_pitch: 0.0
+  kd_pitch: 0.08
+  integral_limit_deg_s: 8.0
+  compensation_mode: "combined"
+
+logging:
+  level: "INFO"
+  file_output: false
+  file_path: "integrated_demo.log"
+  distance_log_period_seconds: 0.0
+  safety_log_period_seconds: 0.0
+  danger_log_period_seconds: 1.0
+  imu_log_period_seconds: 0.0
+  control_log_period_seconds: 0.0
+
+display:
+  monitor_period_seconds: 1.5
+  stale_timeout_seconds: 2.0
+
+plot:
+  output_dir: "integrated_outputs"
+  max_samples: 5000

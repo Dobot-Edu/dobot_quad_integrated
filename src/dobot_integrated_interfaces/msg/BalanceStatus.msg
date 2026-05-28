@@ -1,0 +1,10 @@
+builtin_interfaces/Time stamp
+string state
+float32 raw_roll_deg
+float32 raw_pitch_deg
+float32 filtered_roll_deg
+float32 filtered_pitch_deg
+float32 command_roll_deg
+float32 command_pitch_deg
+bool compensating
+string event
