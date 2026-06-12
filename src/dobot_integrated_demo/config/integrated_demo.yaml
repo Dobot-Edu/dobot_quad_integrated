@@ -22,9 +22,7 @@ feedback_audio:
   enabled: true
   backend: "direct"
   use_dds_config: true
-  voice_cmd_topic: "rt/voice/cmd_tmp"
-  voice_action_topic: "rt/action/state"
-  voice_cmd_protocol: "task"
+  voice_cmd_topic: "rt/voice/cmd"
   play_async: false
   base_dir: "wavs"
   files:

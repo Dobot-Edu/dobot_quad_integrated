@@ -143,9 +143,7 @@ class MotionGatewayNode(Node):
         self._audio_player = AudioPlayer(
             dds_domain_id=robot_cfg.get("dds_domain_id", 0),
             dds_config=self._resolve_dds_config(robot_cfg.get("dds_config")),
-            topic_name=str(feedback_cfg.get("voice_cmd_topic", "rt/voice/cmd_tmp")),
-            action_topic_name=str(feedback_cfg.get("voice_action_topic", "rt/action/state")),
-            protocol=str(feedback_cfg.get("voice_cmd_protocol", "task")),
+            topic_name=str(feedback_cfg.get("voice_cmd_topic", "rt/voice/cmd")),
         )
         try:
             self._audio_player.init()
