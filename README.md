@@ -47,8 +47,8 @@ IMU DDS
 
 本地 WAV
     -> AudioPlayer
-    -> VoiceAction + VoiceCmd
-    -> DDS 新版语音播报链路
+    -> VoiceCmd(header/priority/task_id/type/path/data/flag)
+    -> DDS rt/voice/cmd 新版语音播报链路
     -> 机器人扬声器
 ```
 
@@ -138,9 +138,9 @@ python -c "import dobot_quad; print(dobot_quad.__file__)"
 
 ```bash
 cd ~/dobot_integrated_demo/dobot_quad_sdk-main/dist
-sudo dpkg -i dds-middleware-with-thirdparty_0.22.10_amd64.deb
+sudo dpkg -i dds-middleware-with-thirdparty_0.23.*_amd64.deb
 export CYCLONEDDS_HOME="/usr/local/"
-python -m pip install --force-reinstall dds_middleware_python-0.22.10-cp310-cp310-linux_x86_64.whl
+python -m pip install --force-reinstall dds_middleware_python-0.23.*-cp310-cp310-linux_x86_64.whl
 python -m pip install cyclonedds
 ```
 
@@ -171,7 +171,7 @@ cd ~/dobot_integrated_demo
 source .venv/bin/activate
 mkdir -p models
 cd models
-wget https://alphacephei.com/vosk/models/vosk-model-small-cn-0.22.zip
+wget https://alphacephei.com/vosk/models/vosk-model-small-cn-0.22.zip   #当前工程包已经包含，可省略
 unzip vosk-model-small-cn-0.22.zip
 ```
 
@@ -249,16 +249,6 @@ export CYCLONEDDS_URI=file:///home/$USER/dobot_integrated_demo/dobot_quad_sdk-ma
 ros2 launch dobot_integrated_demo integrated_demo.launch.py
 ```
 
-常用启动参数：
-
-```bash
-ros2 launch dobot_integrated_demo integrated_demo.launch.py rviz:=false
-ros2 launch dobot_integrated_demo integrated_demo.launch.py enable_safety:=false
-ros2 launch dobot_integrated_demo integrated_demo.launch.py enable_balance:=false
-ros2 launch dobot_integrated_demo integrated_demo.launch.py enable_safety:=false enable_balance:=false rviz:=false record_plot:=false
-ros2 launch dobot_integrated_demo integrated_demo.launch.py enable_demo_monitor:=false
-```
-
 默认主终端会显示综合面板，汇总语音、动作、安全和 IMU 平衡摘要。深度距离和 IMU 高频数据不作为主终端连续日志展示；需要细节时可查看CSV 或 HTML 曲线，保存在**integrated_outputs**文件夹中。
 
 ## 9. 核心配置说明
@@ -287,9 +277,7 @@ feedback_audio:
   enabled: true
   backend: "direct"
   use_dds_config: true
-  voice_cmd_topic: "rt/voice/cmd_tmp"
-  voice_action_topic: "rt/action/state"
-  voice_cmd_protocol: "task"
+  voice_cmd_topic: "rt/voice/cmd"
   base_dir: "wavs"
 ```
 
@@ -358,7 +346,7 @@ visualization:
 
 默认启动后，主终端会周期显示综合面板：
 
-![截图 2026-05-19 15-42-56](./assets/截图 2026-05-19 15-42-56.png)
+![image1](./assets/image1.png)
 
 ```text
 ================ Dobot Integrated Teaching Console ================
